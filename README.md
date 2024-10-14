@@ -9,7 +9,7 @@ within the .env files, add
     PGDATABASE = nc_news // to the development
     PGDATABASE = nc_news_test // to the test
 
-make sure they're mentioned inthe .gitignore file
+make sure they're mentioned in the .gitignore file
     you can use .env.* for all .env files
     just double check to make sure it's there
 
