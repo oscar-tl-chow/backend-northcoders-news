@@ -4,6 +4,7 @@ const seed = require("../db/seeds/seed.js")
 const db = require("../db/connection.js")
 const testData = require("../db/data/test-data/index.js")
 const endpoints = require("../endpoints.json")
+require('jest-sorted')
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -25,13 +26,55 @@ describe('GET /api/topics', () => {
         return request(app)
         .get('/api/topics')
         .expect(200)
-        .then((response) => {
-            expect(response.body.topics.length).toBe(3)
-            response.body.topics.forEach((topic) => {
+        .then(({ body }) => {
+            expect(body.topics.length).toBe(3)
+            body.topics.forEach((topic) => {
                 expect(topic).toHaveProperty("slug")
                 expect(topic).toHaveProperty("description")
             })
         })
+    })
+})
+
+describe('GET /api/articles', () => {
+    test("200 - responds with all articles", () => {
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.articles).toHaveLength(13)
+            body.articles.forEach((article) => {
+                expect(article).toHaveProperty("author")
+                expect(article).toHaveProperty("title")
+                expect(article).toHaveProperty("article_id")
+                expect(article).toHaveProperty("topic")
+                expect(article).toHaveProperty("created_at")
+                expect(article).toHaveProperty("votes")
+                expect(article).toHaveProperty("article_img_url")
+                expect(article).toHaveProperty("comment_count")
+            })
+        })
+    })
+    test("articles date in descending order", () => {
+        return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.articles).toHaveLength(13)
+            expect(body.articles).toBeSortedBy("created_at", {
+                descending: true
+            })
+        })
+    })
+    test("articles has no article body", () => {
+        return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .then(({ body }) => {
+                body.articles.forEach((article) => {
+                    expect(article).not.toHaveProperty("body")
+                })
+            })
     })
 })
 
@@ -40,15 +83,15 @@ describe('GET /api/articles/:article_id', () => {
 		return request(app)
 		.get('/api/articles/1')
 		.expect(200)
-		.then((response) => {
-			expect(response.body.article).toHaveProperty("author")
-			expect(response.body.article).toHaveProperty("title")
-			expect(response.body.article).toHaveProperty("article_id")
-			expect(response.body.article).toHaveProperty("body")
-			expect(response.body.article).toHaveProperty("topic")
-			expect(response.body.article).toHaveProperty("created_at")
-			expect(response.body.article).toHaveProperty("votes")
-			expect(response.body.article).toHaveProperty("article_img_url")
+		.then(({ body }) => {
+			expect(body.article).toHaveProperty("author")
+			expect(body.article).toHaveProperty("title")
+			expect(body.article).toHaveProperty("article_id")
+			expect(body.article).toHaveProperty("body")
+			expect(body.article).toHaveProperty("topic")
+			expect(body.article).toHaveProperty("created_at")
+			expect(body.article).toHaveProperty("votes")
+			expect(body.article).toHaveProperty("article_img_url")
 		})
 	})
     test("404 - responds with error message when that article exist", () => {
