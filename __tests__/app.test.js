@@ -94,7 +94,7 @@ describe('GET /api/articles/:article_id', () => {
 			expect(body.article).toHaveProperty("article_img_url")
 		})
 	})
-    test("404 - responds with error message when that article exist", () => {
+    test("404 - responds with error message when that article does not exist", () => {
         return request(app)
         .get("/api/articles/99999")
         .expect(404)
@@ -109,6 +109,52 @@ describe('GET /api/articles/:article_id', () => {
         .then(({ body }) => {
             expect(body.msg).toBe("bad request")
         })
+    })
+})
+
+describe('GET /api/articles/:article_id/comments', () => {
+    test("return all comments of article with the input article id", () => {
+        return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.comments).toHaveLength(11)
+            expect(body.comments.forEach((comment) => {
+                expect(comment).toHaveProperty("comment_id")
+                expect(comment).toHaveProperty("votes")
+                expect(comment).toHaveProperty("created_at")
+                expect(comment).toHaveProperty("author")
+                expect(comment).toHaveProperty("body")
+                expect(comment).toHaveProperty("article_id")
+            }))
+        })
+    })
+    test("comments are ordered by descending dates", () => {
+        return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.comments).toHaveLength(11);
+            expect(body.comments).toBeSortedBy("created_at", {
+                descending: true
+            })
+        }) 
+    })
+    test("404 - responds with an error message when article does not exist", () => {
+        return request(app)
+            .get("/api/articles/99999/comments")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("no comments in article found with ID 99999")
+            })
+    })
+    test("400 - responds with error message when entered invalid ID", () => {
+        return request(app)
+            .get("/api/articles/one/comments")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("bad request")
+            })
     })
 })
 
