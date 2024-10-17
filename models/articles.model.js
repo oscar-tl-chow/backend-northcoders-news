@@ -50,8 +50,7 @@ const fetchArticleComments = (articleId) => {
             body,
             article_id
             FROM comments WHERE article_id = $1
-            ORDER BY created_at DESC;
-        `, [ articleId ])
+            ORDER BY created_at DESC;`, [ articleId ])
         .then((result) => {
             if(result.rows.length === 0) {
                 return Promise.reject({status: 404, msg: `no comments in article found with ID ${articleId}`})
@@ -60,5 +59,33 @@ const fetchArticleComments = (articleId) => {
         })
 }
 
+const addComment = (articleId, newComment) => {
+    const { username, body } = newComment
+    if(!Number(articleId) || !newComment) {
+        return Promise.reject({status: 400, msg: "bad request"})
+    }
+    if(!newComment.username || !newComment.body) {
+        return Promise.reject({status: 400, msg: "bad request"})
+    }
+    return db.query(`SELECT * FROM users WHERE username = $1;`, [username])    
+        .then(({ rows }) => {
+            if(rows.length === 0) {
+                return Promise.reject({status: 404, msg: "no user exists"})
+        }
+        return db.query(`SELECT * FROM articles WHERE article_id = $1;`, [articleId])    
+        .then(({ rows }) => {
+            if(rows.length === 0) {
+                return Promise.reject({status: 404, msg: `no comments in article found with ID ${articleId}`})
+            }
+        //had to put the below db.query in the above return for it to work
+        return db.query(`INSERT INTO comments (author, body, article_id)
+            VALUES ($1, $2, $3) RETURNING *;`, [username, body, articleId])
+            .then(({ rows }) => {
+                return rows[0]
+            })
+        })
+})
+}
 
-module.exports = { fetchArticlesById, fetchArticles, fetchArticleComments }
+
+module.exports = { fetchArticlesById, fetchArticles, fetchArticleComments, addComment }

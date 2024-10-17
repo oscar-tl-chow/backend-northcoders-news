@@ -158,3 +158,76 @@ describe('GET /api/articles/:article_id/comments', () => {
     })
 })
 
+describe('POST /api/articles/:article_id/comments', () => {
+    const articleId = 1
+    const testComment = {username: "butter_bridge", body: "test"}
+    const testComment2 = {username: "butter_bridge", body: "test", extraBody: "extraTest"}
+    test("201 - return posted comment", () => {
+        return request(app)
+        .post(`/api/articles/${articleId}/comments`)
+        .send(testComment)
+        .expect(201)
+        .then(({ body }) => {
+            expect(body.comment.author).toEqual(testComment.username)
+            expect(body.comment.body).toEqual(testComment.body)
+            expect(body.comment.article_id).toEqual(articleId)
+        })
+    })
+    test("201 - return posted comment, ignoring anything extra key value pair, in this case extraBody, extraTest", () => {
+        return request(app)
+        .post(`/api/articles/${articleId}/comments`)
+        .send(testComment2)
+        .expect(201)
+        .then(({ body }) => {
+            expect(body.comment.author).toEqual(testComment.username)
+            expect(body.comment.body).toEqual(testComment.body)
+            expect(body.comment.article_id).toEqual(articleId)
+        })
+    })
+    test("400 - responds with an error message when body does not exist", () => {
+        return request(app)
+            .post(`/api/articles/${articleId}/comments`)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("bad request")
+            })
+    })
+    test("400 - responds with an error message when only body is present without username", () => {
+        const badRequestComment = { body: "bad request comment" }
+        return request(app)
+            .post(`/api/articles/${articleId}/comments`)
+            .send(badRequestComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("bad request")
+        })
+    })
+    test("400 - responds with an error message when article id is invalid", () => {
+        return request(app)
+            .post(`/api/articles/one/comments`)
+            .send(testComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("bad request")
+        })
+    })
+    test("404 - responds with an error message when username does not exist", () => {
+        const noUserExistComment = { username: "unknownUser", body: "test" }
+        return request(app)
+            .post(`/api/articles/${articleId}/comments`)
+            .send(noUserExistComment)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("no user exists")
+        })
+    })
+    test("404 - responds with an error message when article id does not exist", () => {
+        return request(app)
+        .post(`/api/articles/99999/comments`)
+        .send(testComment)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("no comments in article found with ID 99999")
+        })
+    })
+})
