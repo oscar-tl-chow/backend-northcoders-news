@@ -109,5 +109,20 @@ const newArticleVotes = (articleId, newVotes) => {
                 })
 }
 
+const deleteComment = (commentId) => {
+    if(!Number(commentId)) {
+        return Promise.reject({ status: 400, msg: "bad request"})
+    }
+    return db.query(`DELETE FROM comments WHERE comment_id = $1
+                    RETURNING *;`, [commentId])
+                .then(({ rows }) => {
+                    if(rows.length === 0) {
+                        return Promise.reject({ status: 404, msg: `no comment found with ID ${commentId}` })
+                    }
+                    const comment = rows[0]
+                    return comment
+                })
+}
 
-module.exports = { fetchArticlesById, fetchArticles, fetchArticleComments, addComment, newArticleVotes }
+
+module.exports = { fetchArticlesById, fetchArticles, fetchArticleComments, addComment, newArticleVotes, deleteComment }

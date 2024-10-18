@@ -231,6 +231,7 @@ describe('POST /api/articles/:article_id/comments', () => {
         })
     })
 })
+
 describe('PATCH /api/articles/:article_id', () => {
     const testPatch = { inc_votes: 1 }
     const testPatchMinus = { inc_votes: -100 }
@@ -299,6 +300,34 @@ describe('PATCH /api/articles/:article_id', () => {
             .expect(404)
             .then(({ body }) => {
                 expect(body.msg).toBe("no article found with ID 99999")
+            })
+    })
+})
+
+describe('DELETE /api/comments/:comment_id', () => {
+    const commentId = 1
+    test("204 - responds with empty string after deleting comment", () => {
+        return request(app)
+            .delete(`/api/comments/${commentId}`)
+            .expect(204)
+            .then(({ text }) => {
+                expect(text).toBe("")
+        })
+    })
+    test("400 - responds with error message when comment id is invalid", () => {
+        return request(app)
+            .delete("/api/comments/one")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("bad request")
+            })
+    })
+    test("404 - responds with error message when comment id does not exist", () => {
+        return request(app)
+            .delete("/api/comments/99999")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("no comment found with ID 99999")
             })
     })
 })
