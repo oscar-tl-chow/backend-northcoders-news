@@ -331,3 +331,21 @@ describe('DELETE /api/comments/:comment_id', () => {
             })
     })
 })
+
+describe('GET /api/users', () => {
+    test("200 - respond with all users", () => {
+        return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.users).toHaveLength(4)
+            expect(typeof body.users).toEqual("object")
+            body.users.forEach((user) => {
+                expect(user).toHaveProperty("username")
+                expect(user).toHaveProperty("name")
+                expect(user).toHaveProperty("avatar_url")
+            })
+        })   
+    })
+    
+})
