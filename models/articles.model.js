@@ -84,8 +84,30 @@ const addComment = (articleId, newComment) => {
                 return rows[0]
             })
         })
-})
+    })
+}
+
+const newArticleVotes = (articleId, newVotes) => {
+    if(!Number(articleId)) {
+        return Promise.reject({ status: 400, msg: "bad request"})
+    }
+    if(!newVotes) {
+        return Promise.reject({ status: 400, msg: "bad request"})
+    }
+    if(!Number(newVotes)) {
+        return Promise.reject({ status: 400, msg: "bad request"})
+    }
+    return db.query(`UPDATE articles
+                    SET votes = votes + $1
+                    WHERE article_id = $2
+                    RETURNING *;`, [newVotes, articleId])
+                .then(({ rows }) => {
+                    if(rows.length === 0) {
+                        return Promise.reject({ status: 404, msg: `no article found with ID ${articleId}`})
+                    }
+                    return rows[0]
+                })
 }
 
 
-module.exports = { fetchArticlesById, fetchArticles, fetchArticleComments, addComment }
+module.exports = { fetchArticlesById, fetchArticles, fetchArticleComments, addComment, newArticleVotes }

@@ -10,7 +10,7 @@ beforeEach(() => seed(testData));
 afterAll(() => db.end());
 
 describe('GET /api', () => {
-    test("responds with object containing all endpoints", () => {
+    test("200 - responds with object containing all endpoints", () => {
         return request(app)
         .get('/api')
         .expect(200)
@@ -113,7 +113,7 @@ describe('GET /api/articles/:article_id', () => {
 })
 
 describe('GET /api/articles/:article_id/comments', () => {
-    test("return all comments of article with the input article id", () => {
+    test("200 - return all comments of article with the input article id", () => {
         return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
@@ -129,7 +129,7 @@ describe('GET /api/articles/:article_id/comments', () => {
             }))
         })
     })
-    test("comments are ordered by descending dates", () => {
+    test("200 - comments are ordered by descending dates", () => {
         return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
@@ -184,7 +184,7 @@ describe('POST /api/articles/:article_id/comments', () => {
             expect(body.comment.article_id).toEqual(articleId)
         })
     })
-    test("400 - responds with an error message when body does not exist", () => {
+    test("400 - responds with error message when body does not exist", () => {
         return request(app)
             .post(`/api/articles/${articleId}/comments`)
             .expect(400)
@@ -192,7 +192,7 @@ describe('POST /api/articles/:article_id/comments', () => {
                 expect(body.msg).toBe("bad request")
             })
     })
-    test("400 - responds with an error message when only body is present without username", () => {
+    test("400 - responds with error message when only body is present without username", () => {
         const badRequestComment = { body: "bad request comment" }
         return request(app)
             .post(`/api/articles/${articleId}/comments`)
@@ -202,7 +202,7 @@ describe('POST /api/articles/:article_id/comments', () => {
                 expect(body.msg).toBe("bad request")
         })
     })
-    test("400 - responds with an error message when article id is invalid", () => {
+    test("400 - responds with error message when article id is invalid", () => {
         return request(app)
             .post(`/api/articles/one/comments`)
             .send(testComment)
@@ -211,7 +211,7 @@ describe('POST /api/articles/:article_id/comments', () => {
                 expect(body.msg).toBe("bad request")
         })
     })
-    test("404 - responds with an error message when username does not exist", () => {
+    test("404 - responds with error message when username does not exist", () => {
         const noUserExistComment = { username: "unknownUser", body: "test" }
         return request(app)
             .post(`/api/articles/${articleId}/comments`)
@@ -221,13 +221,84 @@ describe('POST /api/articles/:article_id/comments', () => {
                 expect(body.msg).toBe("no user exists")
         })
     })
-    test("404 - responds with an error message when article id does not exist", () => {
+    test("404 - responds with error message when article id does not exist", () => {
         return request(app)
-        .post(`/api/articles/99999/comments`)
-        .send(testComment)
-        .expect(404)
-        .then(({ body }) => {
-            expect(body.msg).toBe("no comments in article found with ID 99999")
+            .post(`/api/articles/99999/comments`)
+            .send(testComment)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("no comments in article found with ID 99999")
         })
+    })
+})
+describe('PATCH /api/articles/:article_id', () => {
+    const testPatch = { inc_votes: 1 }
+    const testPatchMinus = { inc_votes: -100 }
+    const errorPatch = { inc_votes: "one" }
+    const articleId1 = {article_id: 1,
+                        title: "Living in the shadow of a great man",
+                        topic: "mitch",
+                        author: "butter_bridge",
+                        body: "I find this existence challenging",
+                        created_at: 1594329060000,
+                        votes: 100,
+                        article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+                    }
+    test("200 - responds with updated article and new plus vote count", () => {
+        return request(app)
+            .patch("/api/articles/1")
+            .send(testPatch)
+            .expect(200)
+            .then(({ body }) => {
+                const updatedVotes = body.article.votes
+                const expectedVotes = articleId1.votes + testPatch.inc_votes
+                expect(updatedVotes).toBe(expectedVotes)
+        })
+    })
+    test("200 - responds with updated article and new minus vote count", () => {
+        return request(app)
+            .patch("/api/articles/1")
+            .send(testPatchMinus)
+            .expect(200)
+            .then(({ body }) => {
+                const updatedVotes = body.article.votes
+                const expectedVotes = articleId1.votes + testPatchMinus.inc_votes
+                expect(updatedVotes).toBe(expectedVotes)
+        })
+    })
+    test("400 - responds with error message when patch is not a number", () => {
+        return request(app)
+            .patch("/api/articles/1")
+            .send(errorPatch)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("bad request")
+        })
+    })
+    test("400 - responds with error message when article id is invalid", () => {
+        return request(app)
+            .patch("/api/articles/one")
+            .send(testPatch)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("bad request")
+        })
+    })
+    test("400 - responds with error message when patch is empty", () => {
+        return request(app)
+            .patch("/api/articles/1")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("bad request")
+            })
+    })
+    test("404 - responds with error message when article id does not exist", () => {
+        return request(app)
+            .patch("/api/articles/99999")
+            .send(testPatch)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("no article found with ID 99999")
+            })
     })
 })
