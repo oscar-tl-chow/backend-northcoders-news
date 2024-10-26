@@ -25,5 +25,95 @@
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "serves an array of articles by id",
+    "queries": [],
+    "exampleResponse": {
+      "title": "Running a Node App",
+      "topic": "coding",
+      "author": "jessjelly",
+      "body": "This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.",
+      "created_at": 1604728980000,
+      "votes": 0,
+      "article_img_url": "https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?w=700&h=700"
+    }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves an array of comments for specified article by id",
+    "queries": [],
+    "exampleResponse": {
+      "comments": [
+        {
+          "comment_id": 1,
+          "votes": 14,
+          "created_at": 1604113380000,
+          "author": "butter_bridge",
+          "body": "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+          "article_id": 1
+        },
+        {
+          "comment_id": 2,
+          "votes": 100,
+          "created_at": 1583025180000,
+          "author": "icellusedkars",
+          "body": "Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works.",
+          "article_id": 1
+        }
+      ]
+    }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "creates a comment for specified article by id",
+    "queries": [],
+    "exampleRequest": {
+      "username": "butter_bridge",
+      "body": "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky."
+    },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 20,
+        "votes": 0,
+        "created_at": 1604113380000,
+        "author": "butter_bridge",
+        "body": "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        "article_id": 1
+      }
+    }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "updates the vote count for specified article by id",
+    "queries": [],
+    "exampleRequest": {
+      "inc_votes": 50
+    },
+    "exampleResponse": {
+      "article": {
+        "title": "Running a Node App",
+        "topic": "coding",
+        "author": "jessjelly",
+        "body": "This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.",
+        "created_at": 1604728980000,
+        "votes": 60,
+        "article_img_url": "https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?w=700&h=700"
+      }
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes comment with specified comment id",
+    "queries": []
+  }
+  "GET /api/users": {
+    "description": "serves an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "articles": [
+        {
+          "username": "tickle122",
+          "name": "Tom Tickle",
+          "avatar_url": "https://vignette.wikia.nocookie.net/mrmen/images/d/d6/Mr-Tickle-9a.png/revision/latest?cb=20180127221953"
+        }
+      ]
+    }
   }
 }

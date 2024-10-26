@@ -14,7 +14,7 @@ const { getUsers } = require("./controllers/users.controller");
 
 app.use(express.json());
 
-app.get("/api/", (request, response) => {
+app.get("/api", (request, response) => {
   response.status(200).send({ endpoints: endpoints });
 });
 
