@@ -1,13 +1,14 @@
-const db = require("../db/connection")
+const db = require("../db/connection");
 
 const fetchUsers = () => {
-    return db.query(`SELECT * FROM users;`)
+  return db
+    .query(`SELECT * FROM users;`)
     .then((result) => {
-        return result.rows
+      return result.rows;
     })
     .catch((err) => {
-        next(err)
-    })
-}
+      next(err);
+    });
+};
 
-module.exports = { fetchUsers }
+module.exports = { fetchUsers };
