@@ -13,6 +13,7 @@
     "description": "serves an array of all articles",
     "queries": ["author", "topic", "sort_by", "order"],
     "exampleQueries": {
+      "topic": "cooking",
       "sort_by": "created_at",
       "order": "asc"
     },

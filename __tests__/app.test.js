@@ -55,7 +55,18 @@ describe("GET /api/articles", () => {
         });
       });
   });
-  test("articles date in descending order", () => {
+  test("200 - responds with an array of articles filtered by topic", () => {
+    return request(app)
+      .get("/api/articles?topic=cooking") // Use a valid topic from your data
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeInstanceOf(Array);
+        body.articles.forEach((article) => {
+          expect(article.topic).toBe("cooking");
+        });
+      });
+  });
+  test("200 - returns articles date in descending order", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -66,7 +77,7 @@ describe("GET /api/articles", () => {
         });
       });
   });
-  test("articles has no article body", () => {
+  test("200 - returns articles that has no article body", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -74,6 +85,32 @@ describe("GET /api/articles", () => {
         body.articles.forEach((article) => {
           expect(article).not.toHaveProperty("body");
         });
+      });
+  });
+  test("200 - responds with an empty array when no articles exist", () => {
+    return db
+      .query("BEGIN;")
+      .then(() => db.query("DELETE FROM comments;"))
+      .then(() => db.query("DELETE FROM articles;"))
+      .then(() => db.query("COMMIT;"))
+      .then(() => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toHaveLength(0);
+          });
+      })
+      .catch((err) => {
+        return db.query("ROLLBACK;").then(() => Promise.reject(err));
+      });
+  });
+  test("404 - responds with error message for non-existing route", () => {
+    return request(app)
+      .get("/api/non-existing-route")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Route not found");
       });
   });
 });

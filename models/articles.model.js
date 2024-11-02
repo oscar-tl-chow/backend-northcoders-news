@@ -19,10 +19,8 @@ const fetchArticlesById = (articleId) => {
     });
 };
 
-const fetchArticles = () => {
-  return db
-    .query(
-      `SELECT 
+const fetchArticles = (sort_by = "created_at", order = "DESC") => {
+  let queryStr = `SELECT 
             articles.author,
             articles.title,
             articles.article_id,
@@ -32,11 +30,20 @@ const fetchArticles = () => {
             articles.article_img_url,
             COUNT(comments.comment_id) AS comment_count 
             FROM articles
-            LEFT JOIN comments
-            ON articles.article_id = comments.article_id
-            GROUP BY articles.article_id
-            ORDER BY ${sort_by} ${order};`
-    )
+            LEFT JOIN comments ON articles.article_id = comments.article_id`;
+  const queryParams = [];
+
+  if (topic) {
+    queryStr += ` WHERE articles.topic = $1`;
+    queryParams.push(topic);
+  }
+
+  queryStr += `
+    GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order};`;
+
+  return db
+    .query(queryStr, queryParams)
     .then((result) => {
       return result.rows;
     })

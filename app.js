@@ -41,6 +41,10 @@ app.use((err, request, response, next) => {
   next(err);
 });
 
+app.use((request, response)=>{
+  response.status(404).send({msg: "Route not found"})
+})
+
 app.use((err, request, response, next) => {
   response.status(500).send({ msg: "Internal Server Error" });
 });
