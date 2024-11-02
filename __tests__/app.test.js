@@ -53,6 +53,10 @@ describe("GET /api/articles", () => {
           expect(article).toHaveProperty("article_img_url");
           expect(article).toHaveProperty("comment_count");
         });
+      })
+      .catch((err) => {
+        console.error("Error in 'responds with all articles' test:", err);
+        throw err;
       });
   });
   test("200 - responds with an array of articles filtered by topic", () => {
@@ -87,23 +91,16 @@ describe("GET /api/articles", () => {
         });
       });
   });
-  test("200 - responds with an empty array when no articles exist", () => {
-    return db
-      .query("BEGIN;")
-      .then(() => db.query("DELETE FROM comments;"))
-      .then(() => db.query("DELETE FROM articles;"))
-      .then(() => db.query("COMMIT;"))
-      .then(() => {
-        return request(app)
-          .get("/api/articles")
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.articles).toHaveLength(0);
-          });
-      })
-      .catch((err) => {
-        return db.query("ROLLBACK;").then(() => Promise.reject(err));
-      });
+  test("200 - responds with an empty array when no articles exist", async () => {
+    try {
+      await db.query("BEGIN;");
+      await db.query("DELETE FROM comments;");
+      await db.query("DELETE FROM articles;");
+      const response = await request(app).get("/api/articles").expect(200);
+      expect(response.body.articles).toHaveLength(0);
+    } finally {
+      await db.query("ROLLBACK;");
+    }
   });
   test("404 - responds with error message for non-existing route", () => {
     return request(app)
@@ -129,6 +126,7 @@ describe("GET /api/articles/:article_id", () => {
         expect(body.article).toHaveProperty("created_at");
         expect(body.article).toHaveProperty("votes");
         expect(body.article).toHaveProperty("article_img_url");
+        expect(body.article).toHaveProperty("comment_count");
       });
   });
   test("404 - responds with error message when that article does not exist", () => {

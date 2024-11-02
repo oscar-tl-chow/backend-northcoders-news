@@ -5,21 +5,24 @@ const fetchArticlesById = (articleId) => {
   if (!Number(articleId)) {
     return Promise.reject({ status: 400, msg: "bad request" });
   }
-  return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [articleId])
-    .then(({ rows }) => {
-      const article = rows[0];
-      if (!article) {
-        return Promise.reject({
-          status: 404,
-          msg: `no article found with ID ${articleId}`,
-        });
-      }
-      return article; //return the article found
-    });
+  const queryString = `
+    SELECT articles.*, 
+           COUNT(comments.comment_id) AS comment_count
+    FROM articles
+    LEFT JOIN comments ON comments.article_id = articles.article_id
+    WHERE articles.article_id = $1
+    GROUP BY articles.article_id;
+  `;
+  return db.query(queryString, [articleId]).then(({ rows }) => {
+    const article = rows[0];
+    if (!article) {
+      return Promise.reject({ status: 404, msg: `no article found with ID ${articleId}` });
+    }
+    return article;
+  });
 };
 
-const fetchArticles = (sort_by = "created_at", order = "DESC") => {
+const fetchArticles = (sort_by = "created_at", order = "DESC", topic) => {
   let queryStr = `SELECT 
             articles.author,
             articles.title,
@@ -48,7 +51,8 @@ const fetchArticles = (sort_by = "created_at", order = "DESC") => {
       return result.rows;
     })
     .catch((err) => {
-      next(err);
+      console.error("Error in fetchArticles:", err);
+      throw err;
     });
 };
 

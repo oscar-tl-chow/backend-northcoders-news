@@ -20,7 +20,16 @@ app.get("/api", (request, response) => {
 
 app.get("/api/topics", getTopics);
 
-app.get("/api/articles", getArticles);
+app.get("/api/articles", async (request, response, next) => {
+  try {
+    await getArticles(request, response, next);
+  } catch (err) {
+    console.error("Error in /api/articles route:", err);
+    response.status(500).send({ msg: "Internal Server Error" });
+  }
+});
+
+// app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id", getArticlesById);
 
@@ -41,12 +50,12 @@ app.use((err, request, response, next) => {
   next(err);
 });
 
-app.use((request, response)=>{
-  response.status(404).send({msg: "Route not found"})
-})
+app.use((request, response) => {
+  response.status(404).send({ msg: "Route not found" });
+});
 
 app.use((err, request, response, next) => {
-  response.status(500).send({ msg: "Internal Server Error" });
+  response.status(500).send({ msg: err.msg || "Internal Server Error" });
 });
 
 module.exports = app;

@@ -7,16 +7,14 @@ const {
   deleteComment,
 } = require("../models/articles.model");
 
-const getArticles = (request, response, next) => {
-  const { sort_by, order } = request.query;
-
-  fetchArticles(sort_by, order)
-    .then((articles) => {
-      response.status(200).send({ articles });
-    })
-    .catch((err) => {
-      next(err);
-    });
+const getArticles = async (request, response, next) => {
+  try {
+    const { sort_by, order, topic } = request.query;
+    const articles = await fetchArticles(sort_by, order, topic);
+    response.status(200).send({ articles });
+  } catch (err) {
+    next(err);
+  }
 };
 
 const getArticlesById = (request, response, next) => {
