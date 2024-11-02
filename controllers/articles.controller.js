@@ -40,6 +40,7 @@ const getArticleComments = (request, response, next) => {
 const postComment = (request, response, next) => {
   const articleId = request.params.article_id;
   const comment = request.body;
+
   addComment(articleId, comment)
     .then((comment) => {
       response.status(201).send({ comment });
@@ -52,6 +53,7 @@ const postComment = (request, response, next) => {
 const updateVotes = (request, response, next) => {
   const articleId = request.params.article_id;
   const newVotes = request.body.inc_votes;
+
   newArticleVotes(articleId, newVotes)
     .then((article) => {
       response.status(200).send({ article });
@@ -63,6 +65,7 @@ const updateVotes = (request, response, next) => {
 
 const deleteCommentById = (request, response, next) => {
   const commentId = request.params.comment_id;
+
   deleteComment(commentId)
     .then(() => {
       response.status(204).send();
