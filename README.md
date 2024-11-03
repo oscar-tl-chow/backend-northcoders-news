@@ -1,19 +1,11 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News]().
+This project is about creating a backend using JavaScript, SQL, and Express. 
+- I built a RESTful API that can handle CRUD (Create, Read, Update, Delete) operations
+- Using Express, I set up the server side routing to make sure client requests are handled properly
+- SQL helped manage the database for storing and retrieving data
 
-make .env files for test and development:
-    .env.test
-    .env.development
-within the .env files, add 
-    PGDATABASE = nc_news // to the development
-    PGDATABASE = nc_news_test // to the test
-
-make sure they're mentioned in the .gitignore file
-    you can use .env.* for all .env files
-    just double check to make sure it's there
-
-
+I added testing with Jest to make sure everything works. I wrote some tests to check the API and how it interacts with the database. This project shows that I can build a secure backend whilst doing checks on data validation and error handling.
 
 --- 
 
