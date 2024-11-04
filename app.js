@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const endpoints = require("./endpoints.json");
 const { getTopics } = require("./controllers/topics.controller");
@@ -57,5 +58,7 @@ app.use((request, response) => {
 app.use((err, request, response, next) => {
   response.status(500).send({ msg: err.msg || "Internal Server Error" });
 });
+
+app.use(cors());
 
 module.exports = app;
