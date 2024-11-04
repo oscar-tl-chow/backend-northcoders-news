@@ -13,6 +13,7 @@ const {
 } = require("./controllers/articles.controller");
 const { getUsers } = require("./controllers/users.controller");
 
+app.use(cors());
 app.use(express.json());
 
 app.get("/api", (request, response) => {
@@ -58,7 +59,5 @@ app.use((request, response) => {
 app.use((err, request, response, next) => {
   response.status(500).send({ msg: err.msg || "Internal Server Error" });
 });
-
-app.use(cors());
 
 module.exports = app;
